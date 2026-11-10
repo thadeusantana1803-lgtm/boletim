@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Boletim">
+<meta name="theme-color" content="#F5F3EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171F" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>Meu Boletim</title>
+<style>
+:root{
+  --bg:#F5F3EE; --card:#FFFFFF; --ink:#1C2333; --soft:#5E667A; --line:#E4E0D6; --field:#F5F3EE;
+  --accent:#3F51C8; --accent-ink:#FFFFFF;
+  --ok:#17794B; --ok-bg:#E1F3E9;
+  --go:#1F6F8F; --go-bg:#E0F0F6;
+  --warn:#8F5B00; --warn-bg:#FCEFCF;
+  --hot:#B4470F; --hot-bg:#FDE6D8;
+  --bad:#B3302E; --bad-bg:#FBE1E0;
+  --none:#5E667A; --none-bg:#ECE9E1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14171F; --card:#1E222D; --ink:#EEF0F6; --soft:#A2A9BA; --line:#2E3442; --field:#14171F;
+    --accent:#8C9AF2; --accent-ink:#11141C;
+    --ok:#6FD3A0; --ok-bg:#16352A;
+    --go:#7CC6E2; --go-bg:#15303B;
+    --warn:#F0C15C; --warn-bg:#3A2F12;
+    --hot:#F59A67; --hot-bg:#40241A;
+    --bad:#F28B88; --bad-bg:#421E1F;
+    --none:#A2A9BA; --none-bg:#2A2F3B;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.4;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#app{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* topo */
+.top{display:flex;align-items:center;gap:8px;min-height:52px;margin-bottom:12px}
+.top h1{font-size:26px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0;overflow-wrap:anywhere}
+.top .sub{display:block;font-size:14px;font-weight:500;color:var(--soft);letter-spacing:0}
+.icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);
+  display:grid;place-items:center;flex:none;padding:0}
+.icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* resumo */
+.resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.resumo div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
+.resumo b{display:block;font-size:28px;font-weight:800;line-height:1.1}
+.resumo span{font-size:13px;color:var(--soft)}
+.resumo .r-ok b{color:var(--ok)} .resumo .r-warn b{color:var(--warn)} .resumo .r-hot b{color:var(--hot)}
+
+.barra{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px}
+.barra h2{font-size:14px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.06em}
+.seg{display:flex;background:var(--none-bg);border-radius:10px;padding:2px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:8px;font-size:14px;font-weight:600;color:var(--soft);min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink)}
+
+/* cartões */
+.disc{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:14px 16px;margin-bottom:10px}
+.disc:active{transform:scale(.99)}
+.disc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.disc-top h3{font-size:18px;font-weight:700;overflow-wrap:anywhere}
+.chip{flex:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.n-aprovada,.n-garantida{color:var(--ok);background:var(--ok-bg)}
+.n-caminho{color:var(--go);background:var(--go-bg)}
+.n-atencao{color:var(--warn);background:var(--warn-bg)}
+.n-foco{color:var(--hot);background:var(--hot-bg)}
+.n-risco{color:var(--bad);background:var(--bad-bg)}
+.n-vazio{color:var(--none);background:var(--none-bg)}
+.tris{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 10px}
+.tri{background:var(--field);border-radius:12px;padding:6px 4px;text-align:center}
+.tri small{display:block;font-size:12px;color:var(--soft)}
+.tri b{font-size:19px;font-weight:700}
+.tri.baixo b{color:var(--bad)}
+.tri.final{background:none;border:1.5px dashed var(--line)}
+.tri.final.fechado{border-style:solid;border-color:var(--ink)}
+.msg{font-size:15px;color:var(--soft)}
+.msg strong{color:var(--ink)}
+
+/* detalhe */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0 12px}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:8px 4px;min-height:56px}
+.tabs button small{display:block;font-size:12px;color:var(--soft)}
+.tabs button b{font-size:18px}
+.tabs button[aria-selected=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.tabs button[aria-selected=true] small{color:var(--accent);font-weight:700}
+.painel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.painel h3{font-size:14px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.painel h3:not(:first-child){margin-top:18px}
+.campos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.campo label{display:block;font-size:13px;color:var(--soft);margin-bottom:4px}
+.campo input,.linha input[type=text]{width:100%;height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--field);
+  color:var(--ink);font:inherit;font-size:20px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;padding:0 6px}
+.campo input::placeholder{color:var(--soft);opacity:.5;font-weight:500}
+.campo input:focus,.linha input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.campo input[aria-invalid=true]{border-color:var(--bad);color:var(--bad)}
+.dica{font-size:13px;color:var(--soft);margin-top:6px}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.res div{background:var(--field);border-radius:12px;padding:8px 4px;text-align:center}
+.res small{display:block;font-size:12px;color:var(--soft)}
+.res b{font-size:22px;font-weight:800}
+.res .baixo b{color:var(--bad)}
+.aviso{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:15px;font-weight:600}
+
+/* config */
+.linha{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.linha input[type=text]{flex:1;min-width:0;text-align:left;font-size:17px;font-weight:600;padding:0 12px}
+.linha label.ae{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--soft);flex:none;min-height:44px}
+.linha input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.rot{display:block;font-size:13px;color:var(--soft);margin:10px 0 4px}
+.btn{display:block;width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--card);
+  font-weight:700;font-size:16px;margin-top:8px;padding:0 12px}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.perigo{color:var(--bad)}
+.x{width:44px;height:44px;border:0;background:none;color:var(--bad);font-size:24px;flex:none;border-radius:12px}
+.nota-rodape{font-size:13px;color:var(--soft);text-align:center;margin-top:20px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:15px;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="arq" accept="application/json,.json" hidden>
+
+<script>
+/* ===================== CÁLCULO =====================
+   Notas guardadas em décimos (8,5 -> 85) para arredondar sem erro.
+   Regras do boletim:
+     AP  = média das avaliações parciais lançadas
+     NP  = 0,4 x (AP + GIP) + 0,6 x AE      (disciplina sem AE: NP = AP + GIP)
+     NPR = (AR + NP) / 2
+     Boletim usa a maior entre NP e NPR
+     NF  = (NP1 + NP2 + NP3) / 3
+   Cada etapa arredonda para 1 casa decimal (0,05 sobe).                 */
+const TRIS = [1, 2, 3];
+function dr(n, d) { return Math.floor((2 * n + d) / (2 * d)); } // divisão arredondada, 0,5 sobe
+
+function calcTri(d, n) {
+  const t = d.t[n], r = { ap: null, base: null, np: null, npr: null, ef: null };
+  const aps = t.ap.filter(v => v != null);
+  if (aps.length) {
+    r.ap = dr(aps.reduce((a, b) => a + b, 0), aps.length);
+    r.base = Math.min(100, r.ap + (t.gip || 0));
+  }
+  if (d.temAE) { if (r.base != null && t.ae != null) r.np = dr(4 * r.base + 6 * t.ae, 10); }
+  else if (r.base != null) r.np = r.base;
+  if (r.np != null && t.ar != null) r.npr = dr(t.ar + r.np, 2);
+  if (r.np != null) r.ef = Math.max(r.np, r.npr == null ? 0 : r.npr);
+  return r;
+}
+
+// menor AE (em décimos) que faz a NP do trimestre chegar em "alvo"; null = nem com 10
+function aeParaNP(base, alvo) {
+  for (let v = 0; v <= 100; v++) if (dr(4 * base + 6 * v, 10) >= alvo) return v;
+  return null;
+}
+
+function nivelPor(v) {
+  if (v == null) return 'risco';
+  if (v === 0) return 'garantida';
+  if (v <= 50) return 'caminho';
+  if (v <= 70) return 'atencao';
+  return 'foco';
+}
+
+function analisar(d, media) {
+  const tr = TRIS.map(n => calcTri(d, n));
+  const feitos = tr.filter(x => x.ef != null);
+  const soma = feitos.reduce((a, x) => a + x.ef, 0);
+  const rest = 3 - feitos.length;
+  const o = { tr, nf: null, parcial: feitos.length ? dr(soma, feitos.length) : null, nivel: 'vazio', msg: 'Sem notas lançadas ainda.' };
+
+  if (rest === 0) {
+    o.nf = dr(soma, 3);
+    if (o.nf >= media) { o.nivel = 'aprovada'; o.msg = 'Nota final <strong>' + fmt(o.nf) + '</strong>. Aprovada!'; }
+    else { o.nivel = 'risco'; o.final = true; o.msg = 'Nota final <strong>' + fmt(o.nf) + '</strong>, abaixo de ' + fmt(media) + '. Vai para a recuperação final.'; }
+    return o;
+  }
+  if (!feitos.length) {
+    const andamento = TRIS.some(n => d.t[n].ap.some(v => v != null) || d.t[n].ae != null);
+    if (andamento) o.msg = 'Trimestre em andamento: falta a AE para fechar a nota.';
+    return o;
+  }
+
+  // nota necessária, igual em cada trimestre que falta, para a NF chegar na média
+  let x = null;
+  for (let v = 0; v <= 100; v++) if (dr(soma + v * rest, 3) >= media) { x = v; break; }
+  o.precisa = x;
+
+  if (rest === 1) {
+    const n = TRIS.find(k => tr[k - 1].ef == null), c = tr[n - 1];
+    if (d.temAE && c.base != null) {
+      const ae = x == null ? null : aeParaNP(c.base, x);
+      o.nivel = nivelPor(ae);
+      if (ae === 0) o.msg = 'Aprovação <strong>garantida</strong>, qualquer que seja a nota da AE do ' + n + 'º trimestre.';
+      else if (ae == null) o.msg = 'Nem com 10 na AE do ' + n + 'º trimestre fecha a média. Vai depender da recuperação.';
+      else o.msg = 'Precisa de <strong>' + fmt(ae) + '</strong> na AE do ' + n + 'º trimestre para passar.';
+    } else {
+      o.nivel = nivelPor(x);
+      if (x === 0) o.msg = 'Aprovação <strong>garantida</strong>, qualquer que seja a nota do ' + n + 'º trimestre.';
+      else if (x == null) o.msg = 'Nem com 10 no ' + n + 'º trimestre fecha a média. Vai depender da recuperação.';
+      else o.msg = 'Precisa de <strong>' + fmt(x) + '</strong> no ' + n + 'º trimestre para passar.';
+    }
+  } else {
+    o.nivel = nivelPor(x);
+    if (x === 0) o.msg = 'Aprovação <strong>garantida</strong>.';
+    else if (x == null) o.msg = 'Não fecha a média só com as notas dos trimestres.';
+    else o.msg = 'Precisa de média <strong>' + fmt(x) + '</strong> nos próximos ' + rest + ' trimestres.';
+  }
+  return o;
+}
+
+function fmt(v) { return v == null ? '–' : (v / 10).toFixed(1).replace('.', ','); }
+function ler(txt) { // "8,5" -> 85 ; vazio -> null ; inválido -> undefined
+  txt = String(txt).trim().replace(',', '.');
+  if (txt === '') return null;
+  if (!/^\d{1,2}(\.\d?)?$/.test(txt)) return undefined;
+  const v = Math.round(parseFloat(txt) * 10);
+  return v >= 0 && v <= 100 ? v : undefined;
+}
+
+/* ===================== DADOS ===================== */
+const CHAVE = 'boletim-v1';
+const PADRAO = [['Arte', false], ['Ciências Naturais', true], ['Educação Física', false], ['Geografia', true],
+  ['História', true], ['Inglês', true], ['Língua Portuguesa', true], ['Matemática', true]];
+function uid() { return Math.random().toString(36).slice(2, 9); }
+function novoTri() { return { ap: [null, null, null], gip: null, ae: null, ar: null }; }
+function novaDisc(nome, temAE) { return { id: uid(), nome, temAE, t: { 1: novoTri(), 2: novoTri(), 3: novoTri() } }; }
+function estadoNovo() { return { v: 1, nome: '', turma: '', media: 60, disc: PADRAO.map(p => novaDisc(p[0], p[1])) }; }
+
+function nota(v) { return Number.isInteger(v) && v >= 0 && v <= 100 ? v : null; }
+function normalizar(o) {
+  if (!o || !Array.isArray(o.disc)) throw new Error('formato');
+  const s = { v: 1, nome: String(o.nome || '').slice(0, 40), turma: String(o.turma || '').slice(0, 40),
+    media: nota(o.media) || 60, disc: [] };
+  o.disc.forEach(d => {
+    const n = novaDisc(String(d.nome || 'Disciplina').slice(0, 40), d.temAE !== false);
+    if (d.id) n.id = String(d.id);
+    TRIS.forEach(k => {
+      const t = (d.t && d.t[k]) || {};
+      n.t[k] = { ap: [0, 1, 2].map(i => nota((t.ap || [])[i])), gip: nota(t.gip), ae: nota(t.ae), ar: nota(t.ar) };
+    });
+    s.disc.push(n);
+  });
+  return s;
+}
+
+let S, V = { tela: 'inicio', id: null, tri: 1, ordem: 'prioridade' };
+function carregar() {
+  try { const raw = localStorage.getItem(CHAVE); if (raw) return normalizar(JSON.parse(raw)); } catch (e) {}
+  return estadoNovo();
+}
+function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch (e) { toast('Não consegui salvar neste aparelho.'); } }
+
+/* ===================== TELA ===================== */
+const $ = s => document.querySelector(s);
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+const ROTULO = { aprovada: 'Aprovada', garantida: 'Garantida', caminho: 'No caminho', atencao: 'Atenção', foco: 'Foco total', risco: 'Em risco', vazio: 'Sem notas' };
+const PESO = { risco: 0, foco: 1, atencao: 2, caminho: 3, garantida: 4, aprovada: 5, vazio: 6 };
+function rotulo(a) { return a.final ? 'Rec. final' : ROTULO[a.nivel]; }
+let tt;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600); }
+
+const IC = {
+  cfg: '<svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>',
+  volta: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'
+};
+
+function render() {
+  const app = $('#app');
+  if (V.tela === 'disc' && !S.disc.find(d => d.id === V.id)) V.tela = 'inicio';
+  app.innerHTML = V.tela === 'disc' ? telaDisc() : V.tela === 'config' ? telaConfig() : telaInicio();
+  window.scrollTo(0, 0);
+}
+
+function telaInicio() {
+  const lista = S.disc.map((d, i) => ({ d, i, a: analisar(d, S.media) }));
+  const c = { ok: 0, warn: 0, hot: 0 };
+  lista.forEach(x => {
+    if (['aprovada', 'garantida', 'caminho'].includes(x.a.nivel)) c.ok++;
+    else if (x.a.nivel === 'atencao') c.warn++;
+    else if (x.a.nivel !== 'vazio') c.hot++;
+  });
+  if (V.ordem === 'prioridade') lista.sort((a, b) => PESO[a.a.nivel] - PESO[b.a.nivel] || a.i - b.i);
+  const sub = [S.nome, S.turma].filter(Boolean).join(' · ');
+  return `
+  <header class="top">
+    <h1>Meu Boletim${sub ? `<span class="sub">${esc(sub)}</span>` : ''}</h1>
+    <button class="icon-btn" data-ir="config" aria-label="Ajustes">${IC.cfg}</button>
+  </header>
+  <section class="resumo" aria-label="Resumo">
+    <div class="r-ok"><b class="num">${c.ok}</b><span>tranquilas</span></div>
+    <div class="r-warn"><b class="num">${c.warn}</b><span>atenção</span></div>
+    <div class="r-hot"><b class="num">${c.hot}</b><span>foco total</span></div>
+  </section>
+  <div class="barra">
+    <h2>Disciplinas</h2>
+    <div class="seg" role="group" aria-label="Ordem">
+      <button data-ordem="prioridade" aria-pressed="${V.ordem === 'prioridade'}">Prioridade</button>
+      <button data-ordem="boletim" aria-pressed="${V.ordem === 'boletim'}">Boletim</button>
+    </div>
+  </div>
+  ${lista.map(x => cartao(x.d, x.a)).join('') || '<p class="msg">Nenhuma disciplina. Adicione nos ajustes.</p>'}
+  <p class="nota-rodape">Média para aprovação: ${fmt(S.media)}. As notas ficam salvas só neste aparelho.</p>`;
+}
+
+function celTri(n, r) {
+  const v = r.ef, baixo = v != null && v < S.media;
+  return `<div class="tri${baixo ? ' baixo' : ''}"><small>${n}º tri${r.npr != null && r.npr > r.np ? ' (rec)' : ''}</small><b class="num">${fmt(v)}</b></div>`;
+}
+function cartao(d, a) {
+  const fim = a.nf != null;
+  return `
+  <button class="disc" data-disc="${d.id}">
+    <div class="disc-top"><h3>${esc(d.nome)}</h3><span class="chip n-${a.nivel}">${rotulo(a)}</span></div>
+    <div class="tris">
+      ${TRIS.map(n => celTri(n, a.tr[n - 1])).join('')}
+      <div class="tri final${fim ? ' fechado' : ''}${fim && a.nf < S.media ? ' baixo' : ''}"><small>${fim ? 'Final' : 'Parcial'}</small><b class="num">${fmt(fim ? a.nf : a.parcial)}</b></div>
+    </div>
+    <p class="msg">${a.msg}</p>
+  </button>`;
+}
+
+function telaDisc() {
+  const d = S.disc.find(x => x.id === V.id), t = d.t[V.tri];
+  const campo = (rot, f, i, v) => `<div class="campo"><label for="c-${f}${i}">${rot}</label>
+    <input id="c-${f}${i}" type="text" inputmode="decimal" autocomplete="off" maxlength="4" placeholder="–" data-f="${f}" data-i="${i}" value="${v == null ? '' : fmt(v)}"></div>`;
+  return `
+  <header class="top">
+    <button class="icon-btn" data-ir="inicio" aria-label="Voltar">${IC.volta}</button>
+    <h1>${esc(d.nome)}</h1>
+    <span id="d-chip"></span>
+  </header>
+  <p class="msg" id="d-msg"></p>
+  <div class="tabs" role="tablist" id="d-tabs"></div>
+  <section class="painel">
+    <h3>Avaliações parciais (AP)</h3>
+    <div class="campos">${[0, 1, 2].map(i => campo('AP' + V.tri + '-' + (i + 1), 'ap', i, t.ap[i])).join('')}</div>
+    <p class="dica">Lance só as que já recebeu. A média é feita com as que estiverem preenchidas.</p>
+    <h3>${d.temAE ? 'Prova do trimestre e extras' : 'Extras'}</h3>
+    <div class="campos">
+      ${d.temAE ? campo('AE' + V.tri, 'ae', '', t.ae) : ''}
+      ${campo('AR' + V.tri + ' (recup.)', 'ar', '', t.ar)}
+      ${campo('GIP (bônus)', 'gip', '', t.gip)}
+    </div>
+    <p class="dica">Use vírgula ou ponto: 7,5. AR e GIP só se houver.</p>
+  </section>
+  <section class="painel" id="d-res"></section>`;
+}
+
+function atualizarDisc() {
+  const d = S.disc.find(x => x.id === V.id), a = analisar(d, S.media), r = a.tr[V.tri - 1];
+  $('#d-chip').outerHTML = `<span id="d-chip" class="chip n-${a.nivel}">${rotulo(a)}</span>`;
+  $('#d-msg').innerHTML = a.msg;
+  $('#d-tabs').innerHTML = TRIS.map(n => `<button role="tab" data-tri="${n}" aria-selected="${n === V.tri}">
+    <small>${n}º trimestre</small><b class="num">${fmt(a.tr[n - 1].ef)}</b></button>`).join('');
+  const b = v => v != null && v < S.media ? ' class="baixo"' : '';
+  let aviso = '';
+  if (d.temAE && r.base != null && r.np == null) {
+    const ae = aeParaNP(r.base, S.media);
+    aviso = ae === 0 ? ['n-garantida', 'O trimestre já fecha acima da média, qualquer que seja a AE.']
+      : ae == null ? ['n-risco', 'Nem com 10 na AE o trimestre chega em ' + fmt(S.media) + '. Vale se preparar para a recuperação (AR).']
+      : [ae > 70 ? 'n-foco' : 'n-caminho', 'Para fechar o trimestre com ' + fmt(S.media) + ', precisa de ' + fmt(ae) + ' na AE.'];
+  } else if (r.np != null && r.ef < S.media) {
+    aviso = ['n-atencao', d.t[V.tri].ar == null
+      ? 'Trimestre abaixo de ' + fmt(S.media) + '. Se fizer a recuperação, lance a nota em AR.'
+      : 'Mesmo com a recuperação, o trimestre ficou abaixo de ' + fmt(S.media) + '.'];
+  }
+  $('#d-res').innerHTML = `<h3>Resultado do ${V.tri}º trimestre</h3>
+    <div class="res">
+      <div${b(r.ap)}><small>Média das AP</small><b class="num">${fmt(r.ap)}</b></div>
+      <div${b(r.np)}><small>NP</small><b class="num">${fmt(r.np)}</b></div>
+      <div${b(r.npr)}><small>NPR (com AR)</small><b class="num">${fmt(r.npr)}</b></div>
+    </div>
+    ${aviso ? `<p class="aviso ${aviso[0]}">${aviso[1]}</p>` : ''}
+    <p class="dica">${d.temAE ? 'NP = 40% da média das AP + 60% da AE.' : 'Disciplina sem AE: a NP é a média das AP.'} Vale para o boletim a maior entre NP e NPR.</p>`;
+}
+
+function telaConfig() {
+  return `
+  <header class="top">
+    <button class="icon-btn" data-ir="inicio" aria-label="Voltar">${IC.volta}</button>
+    <h1>Ajustes</h1>
+  </header>
+  <section class="painel">
+    <h3>Aluno</h3>
+    <label class="rot" for="g-nome">Nome</label>
+    <div class="linha"><input id="g-nome" type="text" maxlength="40" data-g="nome" value="${esc(S.nome)}" placeholder="Como quer ser chamada(o)"></div>
+    <label class="rot" for="g-turma">Turma / ano</label>
+    <div class="linha"><input id="g-turma" type="text" maxlength="40" data-g="turma" value="${esc(S.turma)}" placeholder="Ex.: 6º ano · 2026"></div>
+    <label class="rot" for="g-media">Média para aprovação</label>
+    <div class="linha"><input id="g-media" type="text" inputmode="decimal" maxlength="4" data-g="media" value="${fmt(S.media)}"></div>
+  </section>
+  <section class="painel">
+    <h3>Disciplinas</h3>
+    ${S.disc.map(d => `<div class="linha">
+      <input type="text" maxlength="40" data-nome="${d.id}" value="${esc(d.nome)}" aria-label="Nome da disciplina">
+      <label class="ae"><input type="checkbox" data-ae="${d.id}" ${d.temAE ? 'checked' : ''}>tem AE</label>
+      <button class="x" data-rem="${d.id}" aria-label="Remover ${esc(d.nome)}">×</button>
+    </div>`).join('')}
+    <button class="btn" data-acao="add">+ Adicionar disciplina</button>
+    <p class="dica">Desmarque “tem AE” nas disciplinas sem prova trimestral (ex.: Arte, Educação Física). Nelas a NP é a média das AP.</p>
+  </section>
+  <section class="painel">
+    <h3>Cópia de segurança</h3>
+    <button class="btn pri" data-acao="exportar">Salvar cópia das notas</button>
+    <button class="btn" data-acao="importar">Carregar cópia</button>
+    <p class="dica">As notas ficam só neste aparelho. Salve uma cópia de vez em quando, ou para levar a outro celular.</p>
+    <button class="btn perigo" data-acao="zerar">Apagar todas as notas (novo ano)</button>
+  </section>`;
+}
+
+/* ===================== AÇÕES ===================== */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const ds = b.dataset;
+  if (ds.ir) { V.tela = ds.ir; render(); }
+  else if (ds.disc) {
+    V.tela = 'disc'; V.id = ds.disc;
+    const a = analisar(S.disc.find(d => d.id === V.id), S.media);
+    const pend = TRIS.find(n => a.tr[n - 1].ef == null); V.tri = pend || 3;
+    render(); atualizarDisc();
+  }
+  else if (ds.tri) { V.tri = +ds.tri; render(); atualizarDisc(); }
+  else if (ds.ordem) { V.ordem = ds.ordem; render(); }
+  else if (ds.rem) {
+    const d = S.disc.find(x => x.id === ds.rem);
+    if (confirm('Remover "' + d.nome + '" e todas as notas dela?')) { S.disc = S.disc.filter(x => x !== d); salvar(); render(); }
+  }
+  else if (ds.acao === 'add') { S.disc.push(novaDisc('Nova disciplina', true)); salvar(); render(); window.scrollTo(0, document.body.scrollHeight); }
+  else if (ds.acao === 'exportar') exportar();
+  else if (ds.acao === 'importar') $('#arq').click();
+  else if (ds.acao === 'zerar') {
+    if (confirm('Apagar TODAS as notas? As disciplinas continuam. Isso não pode ser desfeito.')) {
+      S.disc.forEach(d => TRIS.forEach(n => d.t[n] = novoTri())); salvar(); toast('Notas apagadas.'); render();
+    }
+  }
+});
+
+document.addEventListener('input', e => {
+  const el = e.target, ds = el.dataset;
+  if (ds.f) {
+    const v = ler(el.value);
+    el.setAttribute('aria-invalid', v === undefined);
+    if (v === undefined) return;
+    const t = S.disc.find(x => x.id === V.id).t[V.tri];
+    if (ds.f === 'ap') t.ap[+ds.i] = v; else t[ds.f] = v;
+    salvar(); atualizarDisc();
+  } else if (ds.g === 'media') {
+    const v = ler(el.value); el.setAttribute('aria-invalid', !v);
+    if (v) { S.media = v; salvar(); }
+  } else if (ds.g) { S[ds.g] = el.value; salvar(); }
+  else if (ds.nome) { S.disc.find(x => x.id === ds.nome).nome = el.value || 'Disciplina'; salvar(); }
+  else if (ds.ae) { S.disc.find(x => x.id === ds.ae).temAE = el.checked; salvar(); }
+});
+// Enter fecha o teclado
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
+
+async function exportar() {
+  const nome = 'boletim-' + (S.nome || 'notas').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + new Date().toISOString().slice(0, 10) + '.json';
+  const txt = JSON.stringify(S, null, 1);
+  try {
+    const f = new File([txt], nome, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
+  a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function init() {
+  S = carregar();
+  $('#arq').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const novo = normalizar(JSON.parse(r.result));
+        if (confirm('Substituir as notas deste aparelho pelas da cópia?')) { S = novo; salvar(); V.tela = 'inicio'; render(); toast('Cópia carregada.'); }
+      } catch (err) { toast('Esse arquivo não é uma cópia válida.'); }
+      e.target.value = '';
+    };
+    r.readAsText(f);
+  });
+  render();
+}
+if (typeof window !== 'undefined') init();
+</script>
+</body>
+</html>
