@@ -360,9 +360,9 @@ function telaDisc() {
     <div class="campos">
       ${d.temAE ? campo('AE' + V.tri, 'ae', '', t.ae) : ''}
       ${campo('AR' + V.tri + ' (recup.)', 'ar', '', t.ar)}
-      ${campo('GIP (bônus)', 'gip', '', t.gip)}
+      ${campo('GIP (até 2,0)', 'gip', '', t.gip)}
     </div>
-    <p class="dica">Use vírgula ou ponto: 7,5. AR e GIP só se houver.</p>
+    <p class="dica">Use vírgula ou ponto: 7,5. AR só se fizer recuperação. GIP é o bônus de participação (até 2,0), somado à média das AP.</p>
   </section>
   <section class="painel" id="d-res"></section>`;
 }
@@ -459,7 +459,8 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const el = e.target, ds = el.dataset;
   if (ds.f) {
-    const v = ler(el.value);
+    let v = ler(el.value);
+    if (ds.f === 'gip' && v > 20) v = undefined; // GIP vale no máximo 2,0
     el.setAttribute('aria-invalid', v === undefined);
     if (v === undefined) return;
     const t = S.disc.find(x => x.id === V.id).t[V.tri];
